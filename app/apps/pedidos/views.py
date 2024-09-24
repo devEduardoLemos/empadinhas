@@ -145,8 +145,8 @@ def call_external_api(pedido, items, comentario):
     produtos = []
     for item in items:
          produtos.append({
-            'nome': item.produto.nome,  # Assuming Produto has a 'codigo' field
-            'codigo': random.randint(10000000, 99999999),
+            'nome': 'ADICIONAL CHANTILLY',  # Assuming Produto has a 'codigo' field
+            'codigo': '215454',
             'quantidade': float(item.quantidade),  # Ensure the quantity is a float
         })
 
