@@ -2,6 +2,7 @@ import os
 from decouple import config
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+# import pymysql
 
 sentry_sdk.init(
     dsn="https://94d1d72580ac4d05b0fb90c1f9c1cccd@o1084842.ingest.sentry.io/6094972",
@@ -92,13 +93,29 @@ WSGI_APPLICATION = 'projeto.wsgi.application'
 #    }  
 #}
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR,'db.sqlite3'),  # Path to your local SQLite database file
+#     }
+# }
+
+# Use PyMySQL as MySQLdb replacement
+#pymysql.install_as_MySQLdb()
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR,'db.sqlite3'),  # Path to your local SQLite database file
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME':'test',      
+        'USER': 'admin',          
+        'PASSWORD': 'Teste123',  
+        'HOST': 'db-empadinhas-test.czaoaumo2svy.us-east-2.rds.amazonaws.com',                   
+        'PORT': '3306',                      
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
