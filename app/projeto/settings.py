@@ -82,16 +82,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'projeto.wsgi.application'
 
 
-#DATABASES = {  
-#    'default': {  
-#        'ENGINE': 'django.db.backends.postgresql',  
-#        'NAME': config('DB_NAME'),  
-#        'USER': config('DB_USER'),  
-#        'PASSWORD': config('DB_PASSWORD'),  
-#        'HOST': config('DB_HOST'),  
-#        'PORT': config('DB_PORT', cast=int)  
-#    }  
-#}
+DATABASES = {  
+   'default': {  
+       'ENGINE': 'django.db.backends.postgresql',  
+       'NAME': config('DATABASE_NAME'),  
+       'USER': config('DATABASE_USER'),  
+       'PASSWORD': config('DATABASE_PASSWORD'),  
+       'HOST': config('DATABASE_HOST'),  
+       'PORT': config('DATABASE_PORT', cast=int)  
+   }  
+}
 
 # DATABASES = {
 #     'default': {
@@ -100,22 +100,20 @@ WSGI_APPLICATION = 'projeto.wsgi.application'
 #     }
 # }
 
-# Use PyMySQL as MySQLdb replacement
-#pymysql.install_as_MySQLdb()
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',  
-        'NAME': config('DATABASE_NAME'),      
-        'USER': config('DATABASE_USER'),          
-        'PASSWORD': config('DATABASE_PASSWORD'),  
-        'HOST': config('DATABASE_HOST'),                   
-        'PORT': config('DATABASE_PORT'),                      
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',  
+#         'NAME': config('DATABASE_NAME'),      
+#         'USER': config('DATABASE_USER'),          
+#         'PASSWORD': config('DATABASE_PASSWORD'),  
+#         'HOST': config('DATABASE_HOST'),                   
+#         'PORT': config('DATABASE_PORT'),                      
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#         }
+#     }
+# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
