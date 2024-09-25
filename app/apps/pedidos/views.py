@@ -137,30 +137,89 @@ def novo_pedido(request):
         }
         return render(request, 'novo_pedido.html', dados)
 
-def call_external_api(pedido, items, comentario):
-    #"""Calls an external API with details of the created Pedido and its items."""
-    url = "https://teste.unikasistemas.com/api/pedidos/criarPedido" #"http://localhost:8080/criarPedido"  # Replace with the actual API URL
+# def call_external_api(pedido, items, comentario):
+#     #"""Calls an external API with details of the created Pedido and its items."""
+#     url =  "http://localhost:8080/criarPedido"  # "https://teste.unikasistemas.com/api/pedidos/criarPedido" Replace with the actual API URL
+
+#     # Build the list of products (produtos) using the accumulated items
+#     produtos = []
+#     for item in items:
+#          produtos.append({
+#             'nome': item.produto.nome,  # Assuming Produto has a 'codigo' field
+#             'codigo': str(item.produto.id),
+#             'quantidade': float(item.quantidade),  # Ensure the quantity is a float
+#         })
+
+#     # Check if 'comentario' is a list and access the first element if it is
+#     if isinstance(comentario, list) and len(comentario) > 0:
+#         comentario_text = comentario[0].comentario  # Get the first comment's text
+#     elif hasattr(comentario, 'comentario'):
+#         comentario_text = comentario.comentario  # Access the comment directly
+#     else:
+#         comentario_text = ""  # Default to an empty string if no comment
+
+#     # Build the payload as per the required JSON format
+#     payload = {
+#         'cnpj': pedido.loja.cnpj , #'27295143000124'
+#         'dataPrevista': pedido.data_entrega.strftime('%d/%m/%Y'),  # Format the date as 'DD/MM/YYYY'
+#         'produtos': produtos,
+#         'observacao': comentario_text, #pedido.comentario_set.first().comentario if pedido.comentario_set.exists() else '',  # Use the first comment, if available
+#         'valorFrete': float(pedido.valor_entrega),  # Convert Decimal to float
+#     }
+
+    
+
+#     try:
+#         # Manually convert the payload to a JSON string
+#         json_payload = json.dumps(payload)
+
+#         # Set the headers, including the API key
+#         headers = {
+#             'Content-Type': 'application/json',
+#             'x-api-key': 'NZayIaucz3mQ9B'  # Include the API key here
+#         }
+
+#         # Make the API call
+#         response = requests.post(url, data=json_payload, headers=headers)
+#         response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
+#         print(f"Successfully sent Pedido to external API {response.content}")
+
+#     except requests.exceptions.HTTPError as http_err:
+#         # Log error details for debugging
+#         print(f"HTTP error occurred: {http_err}")
+#         print(f"Response content: {response.content}")  # Print the error response content
+#     except requests.exceptions.RequestException as e:
+#         print(f"Failed to send Pedido to external API: {e}")
+
+def call_external_api(request, pedido, items, comentario):
+    # Calls an external API with details of the created Pedido and its items
+    url = "https://safeerp.com.br/criarPedido"  # http://localhost:8080/criarPedido Update with actual API URL
 
     # Build the list of products (produtos) using the accumulated items
     produtos = []
     for item in items:
-         produtos.append({
-            'nome': 'ADICIONAL CHANTILLY',  # Assuming Produto has a 'codigo' field
-            'codigo': '215454',
+        produtos.append({
+            'nome': item.produto.nome,  # Assuming Produto has a 'codigo' field
+            'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string
             'quantidade': float(item.quantidade),  # Ensure the quantity is a float
         })
 
+    # Check if 'comentario' is a list and access the first element if it is
+    if isinstance(comentario, list) and len(comentario) > 0:
+        comentario_text = comentario[0].comentario  # Get the first comment's text
+    elif hasattr(comentario, 'comentario'):
+        comentario_text = comentario.comentario  # Access the comment directly
+    else:
+        comentario_text = ""  # Default to an empty string if no comment
+
     # Build the payload as per the required JSON format
     payload = {
-        'cnpj': '27.295.143/0001-24', #pedido.loja.cnpj,
+        'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
         'dataPrevista': pedido.data_entrega.strftime('%d/%m/%Y'),  # Format the date as 'DD/MM/YYYY'
         'produtos': produtos,
-        'observacao': comentario.comentario, #pedido.comentario_set.first().comentario if pedido.comentario_set.exists() else '',  # Use the first comment, if available
+        'observacao': comentario_text,  # Use the provided comment
         'valorFrete': float(pedido.valor_entrega),  # Convert Decimal to float
-        'nome': "this is a teste"  # Custom name for the order
     }
-
-    
 
     try:
         # Manually convert the payload to a JSON string
@@ -176,13 +235,45 @@ def call_external_api(pedido, items, comentario):
         # Make the API call
         response = requests.post(url, data=json_payload, headers=headers)
         response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
+        
+        # Check if the response contains the word 'error'
+        if 'error' in response.content.decode('utf-8').lower():
+            print(f"API returned an error: {response.content}")
+            # Prevent the transaction from being saved
+            transaction.set_rollback(True)
+            
+            # Add error message to the user
+            messages.error(request, "Failed to create Pedido: External API returned an error.")
+            return False
+
         print(f"Successfully sent Pedido to external API {response.content}")
+
+
     except requests.exceptions.HTTPError as http_err:
         # Log error details for debugging
         print(f"HTTP error occurred: {http_err}")
-        print(f"Response content: {response.content}")  # Print the error response content
+        print(f"Response content: {response.content}")
+        
+        # Prevent the transaction from being saved
+        transaction.set_rollback(True)
+        
+        # Add error message to the user
+        messages.error(request, "Falha ao criarPedido: erro na API Externa.")
+        return False
+
     except requests.exceptions.RequestException as e:
-        print(f"Failed to send Pedido to external API: {e}")
+        print(f"Falha no envio do Pedido para API Externa: {e}")
+
+        # Prevent the transaction from being saved
+        transaction.set_rollback(True)
+
+        # Add error message to the user
+        messages.error(request, "Falha ao criarPedido: erro na API Externa.")
+        return False
+
+    return True  # Indicate success
+
+
 
 #TODO: pode melhorar (tirar metodo da view)
 @login_required
@@ -245,10 +336,8 @@ def fazer_pedido(request, loja):
             pedido.save()
 
              # External API call after the Pedido is saved
-            call_external_api(pedido, items, comentario)
-
-
-            messages.info(request, 'Pedido #{} criado com sucesso'.format(pedido.id), extra_tags='alert alert-success alert-dismissible fade show text-xs')
+            if(call_external_api(request,pedido, items, comentario)):
+                messages.info(request, 'Pedido #{} criado com sucesso'.format(pedido.id), extra_tags='alert alert-success alert-dismissible fade show text-xs')
 
         return redirect('pedidos')
 

@@ -85,7 +85,10 @@ class Produto(models.Model):
         else:
             produtos=cls.objects.filter(grupo_produto=grupo_produto, flag_ativo=True, flag_disponivel=True)
         return produtos
-
+    
+    # Method to return the product ID
+    def get_produto_id(self):
+        return self.id
 
 
 class TabelaDePrecoItens(models.Model):
