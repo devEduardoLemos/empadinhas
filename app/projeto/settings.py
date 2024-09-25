@@ -106,11 +106,11 @@ WSGI_APPLICATION = 'projeto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  
-        'NAME':'test',      
-        'USER': 'admin',          
-        'PASSWORD': 'Teste123',  
-        'HOST': 'db-empadinhas-test.czaoaumo2svy.us-east-2.rds.amazonaws.com',                   
-        'PORT': '3306',                      
+        'NAME': config('DATABASE_NAME'),      
+        'USER': config('DATABASE_USER'),          
+        'PASSWORD': config('DATABASE_PASSWORD'),  
+        'HOST': config('DATABASE_HOST'),                   
+        'PORT': config('DATABASE_PORT'),                      
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }

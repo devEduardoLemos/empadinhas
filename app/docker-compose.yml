@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: django_app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app  # Mount the current directory into the container
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY="your-secret-key-here"
+      - DEBUG=True
+      - TIME_ZONE=UTC
+
+      - EMAIL_HOST=smtp.egruposkip.com
+      - EMAIL_PORT=587
+      - EMAIL_HOST_USER=emailteste@gruposkip.com
+      - EMAIL_HOST_PASSWORD=Teste@12
+      - EMAIL_USE_TLS=True
+      - EMAIL_USE_SSL=False
+      - DEFAULT_FROM_EMAIL=emailteste@gruposkip.com
+
+      - SESSION_COOKIE_AGE=1209600
+
+
+      - DATABASE_NAME=test
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=Teste123
+      - DATABASE_HOST=db-empadinhas-test.czaoaumo2svy.us-east-2.rds.amazonaws.com
+      - DATABASE_PORT=3306
+
