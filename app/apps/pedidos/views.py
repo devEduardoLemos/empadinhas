@@ -161,6 +161,8 @@ def call_external_api(request, pedido, items, comentario):
     else:
         comentario_text = ""  # Default to an empty string if no comment
 
+    comentario_text = f"Nome da loja: {pedido.loja.nome_da_loja}. Comentário: {comentario_text}"
+
     # Build the payload as per the required JSON format
     payload = {
         'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
