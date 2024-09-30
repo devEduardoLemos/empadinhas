@@ -24,6 +24,7 @@ from apps.estoque.models import SugestaoDePedido
 from .forms import PerdaForm, PerdaTipoForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from projeto.utils import pagination_gerar_link
+from decouple import config
 
 
 @login_required
@@ -137,69 +138,16 @@ def novo_pedido(request):
         }
         return render(request, 'novo_pedido.html', dados)
 
-# def call_external_api(pedido, items, comentario):
-#     #"""Calls an external API with details of the created Pedido and its items."""
-#     url =  "http://localhost:8080/criarPedido"  # "https://teste.unikasistemas.com/api/pedidos/criarPedido" Replace with the actual API URL
-
-#     # Build the list of products (produtos) using the accumulated items
-#     produtos = []
-#     for item in items:
-#          produtos.append({
-#             'nome': item.produto.nome,  # Assuming Produto has a 'codigo' field
-#             'codigo': str(item.produto.id),
-#             'quantidade': float(item.quantidade),  # Ensure the quantity is a float
-#         })
-
-#     # Check if 'comentario' is a list and access the first element if it is
-#     if isinstance(comentario, list) and len(comentario) > 0:
-#         comentario_text = comentario[0].comentario  # Get the first comment's text
-#     elif hasattr(comentario, 'comentario'):
-#         comentario_text = comentario.comentario  # Access the comment directly
-#     else:
-#         comentario_text = ""  # Default to an empty string if no comment
-
-#     # Build the payload as per the required JSON format
-#     payload = {
-#         'cnpj': pedido.loja.cnpj , #'27295143000124'
-#         'dataPrevista': pedido.data_entrega.strftime('%d/%m/%Y'),  # Format the date as 'DD/MM/YYYY'
-#         'produtos': produtos,
-#         'observacao': comentario_text, #pedido.comentario_set.first().comentario if pedido.comentario_set.exists() else '',  # Use the first comment, if available
-#         'valorFrete': float(pedido.valor_entrega),  # Convert Decimal to float
-#     }
-
-    
-
-#     try:
-#         # Manually convert the payload to a JSON string
-#         json_payload = json.dumps(payload)
-
-#         # Set the headers, including the API key
-#         headers = {
-#             'Content-Type': 'application/json',
-#             'x-api-key': 'NZayIaucz3mQ9B'  # Include the API key here
-#         }
-
-#         # Make the API call
-#         response = requests.post(url, data=json_payload, headers=headers)
-#         response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
-#         print(f"Successfully sent Pedido to external API {response.content}")
-
-#     except requests.exceptions.HTTPError as http_err:
-#         # Log error details for debugging
-#         print(f"HTTP error occurred: {http_err}")
-#         print(f"Response content: {response.content}")  # Print the error response content
-#     except requests.exceptions.RequestException as e:
-#         print(f"Failed to send Pedido to external API: {e}")
 
 def call_external_api(request, pedido, items, comentario):
     # Calls an external API with details of the created Pedido and its items
-    url = "https://safeerp.com.br/api/pedidos/criarPedido"  # http://localhost:8080/criarPedido Update with actual API URL
+    url = config('API_URL')  # API url
 
     # Build the list of products (produtos) using the accumulated items
     produtos = []
     for item in items:
         produtos.append({
-            'nome': item.produto.nome,  # Assuming Produto has a 'codigo' field
+            'nome': item.produto.nome,  
             'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string,
             'quantidade': float(item.quantidade),  # Ensure the quantity is a float
             'valorUnitario': int(item.preco),
@@ -230,7 +178,7 @@ def call_external_api(request, pedido, items, comentario):
         # Set the headers, including the API key
         headers = {
             'Content-Type': 'application/json',
-            'x-api-key': '1P4DPO8IDVB3e2'  # Include the API key here
+            'x-api-key': config('API_KEY')  # Include the API key here
         }
 
         # Make the API call
