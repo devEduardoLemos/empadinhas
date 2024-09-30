@@ -193,15 +193,16 @@ def novo_pedido(request):
 
 def call_external_api(request, pedido, items, comentario):
     # Calls an external API with details of the created Pedido and its items
-    url = "https://safeerp.com.br/criarPedido"  # http://localhost:8080/criarPedido Update with actual API URL
+    url = "https://safeerp.com.br/api/pedidos/criarPedido"  # http://localhost:8080/criarPedido Update with actual API URL
 
     # Build the list of products (produtos) using the accumulated items
     produtos = []
     for item in items:
         produtos.append({
             'nome': item.produto.nome,  # Assuming Produto has a 'codigo' field
-            'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string
+            'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string,
             'quantidade': float(item.quantidade),  # Ensure the quantity is a float
+            'valorUnitario': int(item.preco),
         })
 
     # Check if 'comentario' is a list and access the first element if it is
@@ -229,23 +230,26 @@ def call_external_api(request, pedido, items, comentario):
         # Set the headers, including the API key
         headers = {
             'Content-Type': 'application/json',
-            'x-api-key': 'NZayIaucz3mQ9B'  # Include the API key here
+            'x-api-key': '1P4DPO8IDVB3e2'  # Include the API key here
         }
 
         # Make the API call
         response = requests.post(url, data=json_payload, headers=headers)
         response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
         
-        # Check if the response contains the word 'error'
-        if 'error' in response.content.decode('utf-8').lower():
+         # Check if "success" is present and is False
+        if not response.json().get('success', True):  # Default to True if 'success' is not found
+            # Get the error message from the response JSON, if available
+            api_error_message = response.json().get('message', 'No detailed error message provided.')
             print(f"API returned an error: {response.content}")
+
             # Prevent the transaction from being saved
             transaction.set_rollback(True)
             
-            # Add error message to the user
-            messages.error(request, "Failed to create Pedido: External API returned an error.")
+            # Add error message to the user, including the message from the API
+            messages.error(request, f"Falha ao criar o Pedido. API Externa retornou um erro: {api_error_message}", extra_tags='alert alert-danger alert-dismissible fade show text-xs')
             return False
-
+    
         print(f"Successfully sent Pedido to external API {response.content}")
 
 
