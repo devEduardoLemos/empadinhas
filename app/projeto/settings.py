@@ -21,7 +21,20 @@ DEBUG = config('DEBUG', cast=bool)
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '157.245.85.137', 'app.comaempadinhas.com.br']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '157.245.85.137', 'app.comaempadinhas.com.br','portal.comaempadinhas.com.br']
+
+ALLOWED_HOSTS = [
+    'empadinhas-new-app-ewh3s.ondigitalocean.app',
+    'app.comaempadinhas.com.br',
+    'portal.comaempadinhas.com.br',  # Add other domains as necessary
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://empadinhas-new-app-ewh3s.ondigitalocean.app',
+    'https://app.comaempadinhas.com.br',
+    'https://portal.comaempadinhas.com.br',  # Add other trusted origins if needed
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',

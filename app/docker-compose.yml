@@ -10,24 +10,27 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - SECRET_KEY="your-secret-key-here"
+      - SECRET_KEY=${SECRET_KEY}
       - DEBUG=True
       - TIME_ZONE=UTC
 
-      - EMAIL_HOST=smtp.egruposkip.com
+      - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=587
-      - EMAIL_HOST_USER=emailteste@gruposkip.com
-      - EMAIL_HOST_PASSWORD=Teste@12
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
       - EMAIL_USE_TLS=True
       - EMAIL_USE_SSL=False
-      - DEFAULT_FROM_EMAIL=emailteste@gruposkip.com
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
 
       - SESSION_COOKIE_AGE=1209600
 
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
 
-      - DATABASE_NAME=postgres
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=Teste123
-      - DATABASE_HOST=db-empadinhas-test-postgress.czaoaumo2svy.us-east-2.rds.amazonaws.com
-      - DATABASE_PORT=5432
+      - API_URL=${API_URL}
+      - API_KEY=${API_KEY}
+
 
