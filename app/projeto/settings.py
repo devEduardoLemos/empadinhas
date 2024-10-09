@@ -102,7 +102,11 @@ DATABASES = {
        'USER': config('DATABASE_USER'),  
        'PASSWORD': config('DATABASE_PASSWORD'),  
        'HOST': config('DATABASE_HOST'),  
-       'PORT': config('DATABASE_PORT', cast=int)  
+       'PORT': config('DATABASE_PORT', cast=int),
+       'CONN_MAX_AGE': 0,  # Let the pool handle connection reuse
+        'OPTIONS': {
+            'sslmode': 'require',  # Enforce SSL
+        },  
    }  
 }
 
