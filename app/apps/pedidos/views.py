@@ -149,8 +149,8 @@ def call_external_api(request, pedido, items, comentario):
         produtos.append({
             'nome': item.produto.nome,  
             'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string,
-            'quantidade': float(item.quantidade),  # Ensure the quantity is a float
-            'valorUnitario': int(item.preco),
+            'quantidade': int(item.quantidade),  # Ensure the quantity is a float
+            'valorUnitario': float(item.preco),
         })
 
     # Check if 'comentario' is a list and access the first element if it is

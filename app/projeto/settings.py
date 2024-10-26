@@ -26,13 +26,15 @@ else:
 ALLOWED_HOSTS = [
     'empadinhas-new-app-ewh3s.ondigitalocean.app',
     'app.comaempadinhas.com.br',
-    'portal.comaempadinhas.com.br',  # Add other domains as necessary
+    'portal.comaempadinhas.com.br',
+    '127.0.0.1',    # Add other domains as necessary
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://empadinhas-new-app-ewh3s.ondigitalocean.app',
     'https://app.comaempadinhas.com.br',
-    'https://portal.comaempadinhas.com.br',  # Add other trusted origins if needed
+    'https://portal.comaempadinhas.com.br',
+    'https://127.0.0.1',    # Add other trusted origins if needed
 ]
 
 
