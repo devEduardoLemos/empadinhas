@@ -27,14 +27,14 @@ ALLOWED_HOSTS = [
     'empadinhas-new-app-ewh3s.ondigitalocean.app',
     'app.comaempadinhas.com.br',
     'portal.comaempadinhas.com.br',
-    '127.0.0.1',  # Add other domains as necessary
+    '127.0.0.1',    # Add other domains as necessary
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://empadinhas-new-app-ewh3s.ondigitalocean.app',
     'https://app.comaempadinhas.com.br',
     'https://portal.comaempadinhas.com.br',
-    'http://127.0.0.1',  # Add other trusted origins if needed
+    'https://127.0.0.1',    # Add other trusted origins if needed
 ]
 
 
@@ -104,7 +104,11 @@ DATABASES = {
        'USER': config('DATABASE_USER'),  
        'PASSWORD': config('DATABASE_PASSWORD'),  
        'HOST': config('DATABASE_HOST'),  
-       'PORT': config('DATABASE_PORT', cast=int)  
+       'PORT': config('DATABASE_PORT', cast=int),
+       'CONN_MAX_AGE': 0,  # Let the pool handle connection reuse
+        'OPTIONS': {
+            'sslmode': 'require',  # Enforce SSL
+        },  
    }  
 }
 
