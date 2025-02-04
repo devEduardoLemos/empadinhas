@@ -139,9 +139,9 @@ def novo_pedido(request):
         return render(request, 'novo_pedido.html', dados)
 
 
-def call_external_api(request, pedido, items, comentario):
+def call_external_api_criar_pedido(request, pedido, items, comentario):
     # Calls an external API with details of the created Pedido and its items
-    url = config('API_URL')  # API url
+    url = config('API_URL')+"/criarPedido"  # API url
 
     # Build the list of products (produtos) using the accumulated items
     produtos = []
@@ -212,7 +212,7 @@ def call_external_api(request, pedido, items, comentario):
         transaction.set_rollback(True)
         
         # Add error message to the user
-        messages.error(request, "Falha ao criarPedido: erro na API Externa.")
+        messages.error(request, f"Falha ao criarPedido: erro na API Externa.", extra_tags='alert alert-danger alert-dismissible fade show text-xs')
         return False
 
     except requests.exceptions.RequestException as e:
@@ -290,7 +290,7 @@ def fazer_pedido(request, loja):
             pedido.save()
 
              # External API call after the Pedido is saved
-            if(call_external_api(request,pedido, items, comentario)):
+            if(call_external_api_criar_pedido(request,pedido, items, comentario)):
                 messages.info(request, 'Pedido #{} criado com sucesso'.format(pedido.id), extra_tags='alert alert-success alert-dismissible fade show text-xs')
 
         return redirect('pedidos')
