@@ -353,8 +353,93 @@ def detalhes_pedido(request, pedido):
     return render(request, 'detalhes_pedido.html', dados)
 
 
+def call_external_api_cancelar_pedido(request, pedido):
+    # Calls an external API with details of the created Pedido and its items
+    url = 'https://teste.unikasistemas.com/api/pedidos/cancelarPedido'#config('API_URL')+"/cancelarPedido"  # API url
+
+    # Build the list of products (produtos) using the accumulated items
+    
+    items = ItensPedido.get_by_pedido(pedido)
+    
+    produtos = []
+    for item in items:
+        produtos.append({
+            'nome': item.produto.nome,  
+            'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string,
+            'quantidade': int(item.quantidade),  # Ensure the quantity is a float
+            'valorUnitario': float(item.preco),
+        })
+    print(f"debug 1")
+
+    # Build the payload as per the required JSON format
+    payload = {
+        'id': pedido.id,
+        'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
+        'observacao': 'Testando cancelar',  # Use the provided comment
+        'valorFrete': float(pedido.valor_entrega),  # Convert Decimal to float
+        'valorTotal': float(pedido.valor_total),
+        'dataPrevista': pedido.data_entrega.strftime('%d/%m/%Y'),  # Format the date as 'DD/MM/YYYY'
+        'produtos': produtos,
+    }
+
+    try:
+        # Manually convert the payload to a JSON string
+        json_payload = json.dumps(payload)
+        print(f"Payload: {json_payload}")
+
+        # Set the headers, including the API key
+        headers = {
+            'Content-Type': 'application/json',
+            'x-api-key': 'NZayIaucz3mQ9B'#config('API_KEY')  # Include the API key here
+        }
+
+        # Make the API call
+        response = requests.post(url, data=json_payload, headers=headers)
+        response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
+        
+        # Check if "success" is present and is False
+        if not response.json().get('success', True):  # Default to True if 'success' is not found
+            # Get the error message from the response JSON, if available
+            api_error_message = response.json().get('message', 'Falha no recebimento dos comandos')
+            print(f"API returned an error: {response.content}")
+
+            # Prevent the transaction from being saved
+            transaction.set_rollback(True)
+            
+            # Add error message to the user, including the message from the API
+            messages.error(request, f"Falha ao cancelar o Pedido. API Externa retornou um erro: {api_error_message}", extra_tags='alert alert-danger alert-dismissible fade show text-xs')
+            return False
+    
+        print(f"Successfully sent Cancelation to external API {response.content}")
+
+    except requests.exceptions.HTTPError as http_err:
+        # Log error details for debugging
+        print(f"HTTP error occurred: {http_err}")
+        print(f"Response content: {response.content}")
+        
+        # Prevent the transaction from being saved
+        transaction.set_rollback(True)
+        
+        # Add error message to the user
+        messages.error(request, f"Falha ao cancelar o pedido: erro na API Externa.", extra_tags='alert alert-danger alert-dismissible fade show text-xs')
+        return False
+
+    except requests.exceptions.RequestException as e:
+        print(f"Falha ao cancelar o Pedido para API Externa: {e}")
+
+        # Prevent the transaction from being saved
+        transaction.set_rollback(True)
+
+        # Add error message to the user
+        messages.error(request, f"Falha ao cancelar o pedido: erro na API Externa.", extra_tags='alert alert-danger alert-dismissible fade show text-xs')
+        return False
+
+    return True  # Indicate success
+
+
 @login_required
 @buyer_user_required
+@transaction.atomic
 def cancelar_pedido(request, pedido):
     pedido = get_object_or_404(Pedido, pk=pedido)
     if request.user.check_acesso_loja(pedido.loja) is False:
@@ -363,6 +448,9 @@ def cancelar_pedido(request, pedido):
     if pedido.status == StatusPedido.get_pendente():
         pedido.status = StatusPedido.get_cancelado()
         pedido.save()
+
+        call_external_api_cancelar_pedido(request, pedido)
+        
         return redirect('pedidos')
     else:
         messages.error(request, 'Não foi possível cancelar o pedido. Somente pedidos ainda pendentes podem ser cancelados.', extra_tags='alert alert-orange alert-dismissible fade show text-xs')

@@ -89,6 +89,10 @@ class ItensPedido(models.Model):
     quantidade_recebida = models.IntegerField(null=True)
     valor_total = models.DecimalField(max_digits=7, decimal_places=2)
 
+    @classmethod
+    def get_by_pedido(cls,pedido_info):
+        return cls.objects.filter(pedido=pedido_info).order_by('id').all()
+
 
 class PerdaTipo(models.Model):
     nome = models.CharField(max_length=30)
