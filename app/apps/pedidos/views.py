@@ -141,14 +141,14 @@ def novo_pedido(request):
 
 def call_external_api_criar_pedido(request, pedido, items, comentario):
     # Calls an external API with details of the created Pedido and its items
-    url = config('API_URL')+"/criarPedido"  # API url
+    url = 'https://teste.unikasistemas.com/api/pedidos/criarPedido'#config('API_URL')+"/criarPedido"  # API url
 
     # Build the list of products (produtos) using the accumulated items
     produtos = []
     for item in items:
         produtos.append({
             'nome': item.produto.nome,  
-            'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string,
+            'codigo': '2626',#str(item.produto.id),  # Ensure 'codigo' is passed as a string,
             'quantidade': int(item.quantidade),  # Ensure the quantity is a float
             'valorUnitario': float(item.preco),
         })
@@ -165,7 +165,8 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
 
     # Build the payload as per the required JSON format
     payload = {
-        'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
+        'id': pedido.id,
+        'cnpj': '27.295.143/0001-24',#pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
         'dataPrevista': pedido.data_entrega.strftime('%d/%m/%Y'),  # Format the date as 'DD/MM/YYYY'
         'produtos': produtos,
         'observacao': comentario_text,  # Use the provided comment
@@ -180,7 +181,7 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
         # Set the headers, including the API key
         headers = {
             'Content-Type': 'application/json',
-            'x-api-key': config('API_KEY')  # Include the API key here
+            'x-api-key': 'NZayIaucz3mQ9B'#config('API_KEY')  # Include the API key here
         }
 
         # Make the API call
@@ -365,7 +366,7 @@ def call_external_api_cancelar_pedido(request, pedido):
     for item in items:
         produtos.append({
             'nome': item.produto.nome,  
-            'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string,
+            'codigo': '2626',#str(item.produto.id),  # Ensure 'codigo' is passed as a string,
             'quantidade': int(item.quantidade),  # Ensure the quantity is a float
             'valorUnitario': float(item.preco),
         })
@@ -374,7 +375,7 @@ def call_external_api_cancelar_pedido(request, pedido):
     # Build the payload as per the required JSON format
     payload = {
         'id': pedido.id,
-        'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
+        'cnpj': '27.295.143/0001-24',#pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
         'observacao': 'Testando cancelar',  # Use the provided comment
         'valorFrete': float(pedido.valor_entrega),  # Convert Decimal to float
         'valorTotal': float(pedido.valor_total),
@@ -445,7 +446,7 @@ def cancelar_pedido(request, pedido):
     if request.user.check_acesso_loja(pedido.loja) is False:
         return redirect('error_403')
 
-    if pedido.status == StatusPedido.get_pendente():
+    if pedido.status in [StatusPedido.get_pendente(), StatusPedido.get_confirmado()]:
         pedido.status = StatusPedido.get_cancelado()
         pedido.save()
 
@@ -453,7 +454,7 @@ def cancelar_pedido(request, pedido):
         
         return redirect('pedidos')
     else:
-        messages.error(request, 'Não foi possível cancelar o pedido. Somente pedidos ainda pendentes podem ser cancelados.', extra_tags='alert alert-orange alert-dismissible fade show text-xs')
+        messages.error(request, 'Não é possível cancelar pedidos já entregues.', extra_tags='alert alert-orange alert-dismissible fade show text-xs')
         return redirect('pedidos')
 
 

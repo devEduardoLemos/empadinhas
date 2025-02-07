@@ -78,6 +78,7 @@
                     <a class="btn btn-pink btn-sm p-3 mb-2" href="{% url 'cancelar_pedido' pedido.id %}">Cancelar Pedido</a>
                     {% elif pedido.status.nome == 'confirmado' %}
                     <a class="btn btn-teal btn-sm p-3 mb-2" href="#" onclick="$('#div1').hide(); $('#div2').show(); ">Confirmar Recebimento</a>
+                    <a class="btn btn-pink btn-sm p-3 mb-2" href="{% url 'cancelar_pedido' pedido.id %}">Cancelar Pedido</a>
                     {% else %}
                     
                     {% endif %}
