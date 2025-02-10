@@ -141,14 +141,14 @@ def novo_pedido(request):
 
 def call_external_api_criar_pedido(request, pedido, items, comentario):
     # Calls an external API with details of the created Pedido and its items
-    url = 'https://teste.unikasistemas.com/api/pedidos/criarPedido'#config('API_URL')+"/criarPedido"  # API url
+    url = config('API_URL')+"/criarPedido"  # API url
 
     # Build the list of products (produtos) using the accumulated items
     produtos = []
     for item in items:
         produtos.append({
             'nome': item.produto.nome,  
-            'codigo': '2626',#str(item.produto.id),  # Ensure 'codigo' is passed as a string,
+            'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string,
             'quantidade': int(item.quantidade),  # Ensure the quantity is a float
             'valorUnitario': float(item.preco),
         })
@@ -166,7 +166,7 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
     # Build the payload as per the required JSON format
     payload = {
         'id': pedido.id,
-        'cnpj': '27.295.143/0001-24',#pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
+        'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
         'dataPrevista': pedido.data_entrega.strftime('%d/%m/%Y'),  # Format the date as 'DD/MM/YYYY'
         'produtos': produtos,
         'observacao': comentario_text,  # Use the provided comment
@@ -181,7 +181,7 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
         # Set the headers, including the API key
         headers = {
             'Content-Type': 'application/json',
-            'x-api-key': 'NZayIaucz3mQ9B'#config('API_KEY')  # Include the API key here
+            'x-api-key': config('API_KEY')  # Include the API key here
         }
 
         # Make the API call
@@ -356,7 +356,7 @@ def detalhes_pedido(request, pedido):
 
 def call_external_api_cancelar_pedido(request, pedido):
     # Calls an external API with details of the created Pedido and its items
-    url = 'https://teste.unikasistemas.com/api/pedidos/cancelarPedido'#config('API_URL')+"/cancelarPedido"  # API url
+    url = config('API_URL')+"/cancelarPedido"  # API url
 
     # Build the list of products (produtos) using the accumulated items
     
@@ -366,7 +366,7 @@ def call_external_api_cancelar_pedido(request, pedido):
     for item in items:
         produtos.append({
             'nome': item.produto.nome,  
-            'codigo': '2626',#str(item.produto.id),  # Ensure 'codigo' is passed as a string,
+            'codigo': str(item.produto.id),  # Ensure 'codigo' is passed as a string,
             'quantidade': int(item.quantidade),  # Ensure the quantity is a float
             'valorUnitario': float(item.preco),
         })
@@ -375,8 +375,8 @@ def call_external_api_cancelar_pedido(request, pedido):
     # Build the payload as per the required JSON format
     payload = {
         'id': pedido.id,
-        'cnpj': '27.295.143/0001-24',#pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
-        'observacao': 'Testando cancelar',  # Use the provided comment
+        'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
+        'observacao': 'Cancelamento',  # Use the provided comment
         'valorFrete': float(pedido.valor_entrega),  # Convert Decimal to float
         'valorTotal': float(pedido.valor_total),
         'dataPrevista': pedido.data_entrega.strftime('%d/%m/%Y'),  # Format the date as 'DD/MM/YYYY'
@@ -391,7 +391,7 @@ def call_external_api_cancelar_pedido(request, pedido):
         # Set the headers, including the API key
         headers = {
             'Content-Type': 'application/json',
-            'x-api-key': 'NZayIaucz3mQ9B'#config('API_KEY')  # Include the API key here
+            'x-api-key': config('API_KEY')  # Include the API key here
         }
 
         # Make the API call
