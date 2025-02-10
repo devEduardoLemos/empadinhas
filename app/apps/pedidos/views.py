@@ -176,7 +176,7 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
     try:
         # Manually convert the payload to a JSON string
         json_payload = json.dumps(payload)
-        print(json_payload)
+        print(f"Payload: {json_payload}")
 
         # Set the headers, including the API key
         headers = {
@@ -201,7 +201,7 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
             messages.error(request, f"Falha ao criar o Pedido. API Externa retornou um erro: {api_error_message}", extra_tags='alert alert-danger alert-dismissible fade show text-xs')
             return False
     
-        print(f"Successfully sent Pedido to external API {response.content}")
+        print(f"Successfully sent Pedido to external API: {response.content}")
 
 
     except requests.exceptions.HTTPError as http_err:
@@ -370,7 +370,6 @@ def call_external_api_cancelar_pedido(request, pedido):
             'quantidade': int(item.quantidade),  # Ensure the quantity is a float
             'valorUnitario': float(item.preco),
         })
-    print(f"debug 1")
 
     # Build the payload as per the required JSON format
     payload = {
@@ -411,7 +410,7 @@ def call_external_api_cancelar_pedido(request, pedido):
             messages.error(request, f"Falha ao cancelar o Pedido. API Externa retornou um erro: {api_error_message}", extra_tags='alert alert-danger alert-dismissible fade show text-xs')
             return False
     
-        print(f"Successfully sent Cancelation to external API {response.content}")
+        print(f"Successfully sent Cancelation to external API: {response.content}")
 
     except requests.exceptions.HTTPError as http_err:
         # Log error details for debugging
