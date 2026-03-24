@@ -7,10 +7,10 @@
 {% include "partials/header_minimal.html" %}    
   <div class="container mt-4">
     <nav class="nav nav-borders">
-      {% for categoria in categorias %}
+      {% for categoria in categorias_menu %}
       <a class="nav-link enfatizar" href="#" id="{{categoria}}">{{categoria.nome}}</a>
       {% endfor %}
-      {% if categorias|length > 1 %}
+      {% if categorias_menu|length > 1 %}
       <a class="nav-link enfatizar" href="#" id="_all">Mostrar Todas</a>
       {% endif %}
     </nav>

@@ -3,6 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
+    image: gruposkip/django-test-empadinhas:1.1
     container_name: django_app
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -31,6 +32,9 @@ services:
       - DATABASE_PORT=${DATABASE_PORT}
 
       - API_URL=${API_URL}
-      - API_KEY=${API_KEY}
+      - API_KEY_IBA=${API_KEY_IBA}
+      - API_KEY_HQZ=${API_KEY_HQZ}
+      - CNPJ_HQZ=${CNPJ_HQZ}
+      - CNPJ_IBA=${CNPJ_IBA}
 
 
