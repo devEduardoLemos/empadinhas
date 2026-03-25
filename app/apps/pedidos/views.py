@@ -86,6 +86,7 @@ def novo_pedido(request):
     if request.method == 'POST':
         categorias=request.POST.getlist('categorias')
         categorias=CategoriaProduto.objects.filter(pk__in=categorias, flag_ativo=True)#.all()
+        categorias_extras = CategoriaProduto.objects.filter(pk__in=categorias)
         if len(categorias) == 0:
             messages.info(request, 'Pelo menos uma categoria deve ser selecionada.', extra_tags='alert alert-danger alert-dismissible fade show text-xs')
             return redirect('pedidos')
@@ -98,9 +99,30 @@ def novo_pedido(request):
             messages.info(request, 'Ainda não há uma tabela de preços configurada para essa loja. Contate o administrador do sistema.', extra_tags='alert alert-danger alert-dismissible fade show text-xs')
             return redirect('pedidos')
         
+        nomes_categorias_extras_selecionadas = list(
+            categorias_extras.values_list('nome', flat=True)
+        )
+
+        categorias_menu = []
+
+        for nome in nomes_categorias_extras_selecionadas:
+            if nome == 'Empadas e Empadões Especiais':
+                categorias_menu.append('Empadas Especiais')
+                categorias_menu.append('Empadões Especiais')
+            elif nome == 'Empadas e Empadões Gourmet e Premium':
+                categorias_menu.append('Empadas Gourmet')
+                categorias_menu.append('Empadas Premium')
+                categorias_menu.append('Empadões Gourmet')
+
+            else:
+                categorias_menu.append(nome)
+
+        categorias_menu_qs = CategoriaProduto.objects.filter(
+            nome__in=categorias_menu
+        )
         produtos_bloqueados=loja.produtos_bloqueados.all()
         produtos=TabelaDePrecoItens.objects.filter(tabela_de_preco=tabela_de_preco, flag_ativo=True)#.all()       
-        produtos=produtos.filter(produto__categoria__in=categorias, produto__flag_disponivel=True).exclude(produto__in=produtos_bloqueados).order_by('produto__nome')
+        produtos=produtos.filter(produto__categoria__in=categorias_menu_qs, produto__flag_disponivel=True).exclude(produto__in=produtos_bloqueados).order_by('produto__nome')
 
         dias_entrega=DiaDeEntrega.opcoes_de_entrega(n=6, dias_gratis=loja.dias_de_entrega)
 
@@ -128,6 +150,7 @@ def novo_pedido(request):
         dados={
             'titulo':titulo,
             'categorias':categorias,
+            'categorias_menu':categorias_menu_qs,
             'produtos':produtos,
             'itens_contagem':itens_contagem,
             'soma_por_categoria':soma_por_categoria,
@@ -163,10 +186,21 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
 
     comentario_text = f"Nome da loja: {pedido.loja.nome_da_loja}. Comentário: {comentario_text}"
 
+    cnpjEmpresa = 0
+    apiKey = 0
+    if pedido.expedido_por.id == 7:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
+        cnpjEmpresa = config('CNPJ_HQZ')  
+        apiKey = config('API_KEY_HQZ')
+    else:
+        cnpjEmpresa = config('CNPJ_IBA')
+        apiKey = config('API_KEY_IBA')
+
+
     # Build the payload as per the required JSON format
     payload = {
         'id': pedido.id,
         'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
+        'cnpjEmpresa': cnpjEmpresa,
         'dataPrevista': pedido.data_entrega.strftime('%d/%m/%Y'),  # Format the date as 'DD/MM/YYYY'
         'produtos': produtos,
         'observacao': comentario_text,  # Use the provided comment
@@ -181,7 +215,7 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
         # Set the headers, including the API key
         headers = {
             'Content-Type': 'application/json',
-            'x-api-key': config('API_KEY')  # Include the API key here
+            'x-api-key': apiKey  # Include the API key here
         }
 
         # Make the API call
@@ -291,8 +325,15 @@ def fazer_pedido(request, loja):
             pedido.save()
 
              # External API call after the Pedido is saved
-            if(call_external_api_criar_pedido(request,pedido, items, comentario)):
-                messages.info(request, 'Pedido #{} criado com sucesso'.format(pedido.id), extra_tags='alert alert-success alert-dismissible fade show text-xs')
+            sucesso = call_external_api_criar_pedido(request, pedido, items, comentario)
+            if not sucesso:
+                return redirect('pedidos')
+
+            messages.info(
+                request,
+                'Pedido #{} criado com sucesso'.format(pedido.id),
+                extra_tags='alert alert-success alert-dismissible fade show text-xs'
+            )
 
         return redirect('pedidos')
 
@@ -371,10 +412,20 @@ def call_external_api_cancelar_pedido(request, pedido):
             'valorUnitario': float(item.preco),
         })
 
+    cnpjEmpresa = 0
+    apiKey = 0
+    if pedido.expedido_por.id == 7:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
+        cnpjEmpresa = config('CNPJ_HQZ')  
+        apiKey = config('API_KEY_HQZ')
+    else:
+        cnpjEmpresa = config('CNPJ_IBA')
+        apiKey = config('API_KEY_IBA')
+
     # Build the payload as per the required JSON format
     payload = {
         'id': pedido.id,
         'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
+        'cnpjEmpresa': cnpjEmpresa,
         'observacao': 'Cancelamento',  # Use the provided comment
         'valorFrete': float(pedido.valor_entrega),  # Convert Decimal to float
         'valorTotal': float(pedido.valor_total),
@@ -390,7 +441,7 @@ def call_external_api_cancelar_pedido(request, pedido):
         # Set the headers, including the API key
         headers = {
             'Content-Type': 'application/json',
-            'x-api-key': config('API_KEY')  # Include the API key here
+            'x-api-key': apiKey  # Include the API key here
         }
 
         # Make the API call
