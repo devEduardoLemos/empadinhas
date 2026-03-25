@@ -188,7 +188,7 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
 
     cnpjEmpresa = 0
     apiKey = 0
-    if pedido.expedido_por.id == 6:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
+    if pedido.expedido_por.id == 7:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
         cnpjEmpresa = config('CNPJ_HQZ')  
         apiKey = config('API_KEY_HQZ')
     else:
@@ -412,10 +412,20 @@ def call_external_api_cancelar_pedido(request, pedido):
             'valorUnitario': float(item.preco),
         })
 
+    cnpjEmpresa = 0
+    apiKey = 0
+    if pedido.expedido_por.id == 7:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
+        cnpjEmpresa = config('CNPJ_HQZ')  
+        apiKey = config('API_KEY_HQZ')
+    else:
+        cnpjEmpresa = config('CNPJ_IBA')
+        apiKey = config('API_KEY_IBA')
+
     # Build the payload as per the required JSON format
     payload = {
         'id': pedido.id,
         'cnpj': pedido.loja.cnpj,  # Assuming 'CNPJ' is a field in the Lojas model
+        'cnpjEmpresa': cnpjEmpresa,
         'observacao': 'Cancelamento',  # Use the provided comment
         'valorFrete': float(pedido.valor_entrega),  # Convert Decimal to float
         'valorTotal': float(pedido.valor_total),
@@ -431,7 +441,7 @@ def call_external_api_cancelar_pedido(request, pedido):
         # Set the headers, including the API key
         headers = {
             'Content-Type': 'application/json',
-            'x-api-key': config('API_KEY')  # Include the API key here
+            'x-api-key': apiKey  # Include the API key here
         }
 
         # Make the API call
