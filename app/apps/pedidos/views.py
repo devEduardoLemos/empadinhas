@@ -186,14 +186,15 @@ def call_external_api_criar_pedido(request, pedido, items, comentario):
 
     comentario_text = f"Nome da loja: {pedido.loja.nome_da_loja}. Comentário: {comentario_text}"
 
-    cnpjEmpresa = 0
-    apiKey = 0
-    if pedido.expedido_por.id == 7:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
-        cnpjEmpresa = config('CNPJ_HQZ')  
-        apiKey = config('API_KEY_HQZ')
-    else:
-        cnpjEmpresa = config('CNPJ_IBA')
-        apiKey = config('API_KEY_IBA')
+    cnpjEmpresa = config('CNPJ_HQZ') 
+    apiKey = config('API_KEY_HQZ')
+    # To be removed
+    # if pedido.expedido_por.id == 7:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
+    #     cnpjEmpresa = config('CNPJ_HQZ')  
+    #     apiKey = config('API_KEY_HQZ')
+    # else:
+    #     cnpjEmpresa = config('CNPJ_IBA')
+    #     apiKey = config('API_KEY_IBA')
 
 
     # Build the payload as per the required JSON format
@@ -412,14 +413,15 @@ def call_external_api_cancelar_pedido(request, pedido):
             'valorUnitario': float(item.preco),
         })
 
-    cnpjEmpresa = 0
-    apiKey = 0
-    if pedido.expedido_por.id == 7:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
-        cnpjEmpresa = config('CNPJ_HQZ')  
-        apiKey = config('API_KEY_HQZ')
-    else:
-        cnpjEmpresa = config('CNPJ_IBA')
-        apiKey = config('API_KEY_IBA')
+    cnpjEmpresa = config('CNPJ_HQZ')
+    apiKey = config('API_KEY_HQZ')
+    # To be removed
+    # if pedido.expedido_por.id == 7:             #OBS: pode ser uma melhor pratica usar o nome cotendo HQZ ou variavel de ambiente no if
+    #     cnpjEmpresa = config('CNPJ_HQZ')  
+    #     apiKey = config('API_KEY_HQZ')
+    # else:
+    #     cnpjEmpresa = config('CNPJ_IBA')
+    #     apiKey = config('API_KEY_IBA')
 
     # Build the payload as per the required JSON format
     payload = {
